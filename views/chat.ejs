@@ -1,0 +1,134 @@
+<%- include("partials/header") %>
+<%- include("partials/nav") %>
+
+<div class="w-full mx-auto p-10 flex h-full gap-3">
+    <!-- <h1 class="text-2xl font-bold mx-[30%]"><%= user.username%></h1> -->
+    <div class="left min-w-80">
+        
+        <div class="userChatBoxHeader flex flex-col gap-3">
+            <% users.forEach(singleUser=>{ %>
+
+            <div onclick="openChat('<%= singleUser.avatar.url%>','<%= singleUser.username%>')"
+                style="border-radius: 0.5rem;" class="cursor-pointer w-full user flex gap-3 items-center p-2 rounded-2 bg-slate-200 w-fit">
+                <img class="h-[4rem] w-[4rem] " style="border-radius: 50%;"
+                src="<%= singleUser.avatar.url%>" alt="">
+                  <h1 class="font-bold text-2xl"><%= singleUser.username%></h1>
+            </div>
+            <%  })%>
+    </div>
+    </div>
+
+
+
+    <div class="right w-full bg-slate-300 h-screen p-2 relative rounded">
+        <div class="top absolute top-2">
+            <div class="userChatBox cursor-pointer flex gap-3 items-center p-2 rounded-2 w-fit"  style="border-radius: 0.5rem;">
+                <img class="h-[4rem] w-[4rem] " style="border-radius: 50%;"
+                src="https://plus.unsplash.com/premium_photo-1663838843887-d664812f1a85?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="">
+                  <h1 class="font-bold text-2xl"><%= user.username%></h1>
+                  <!-- <h1 class="font-bold text-2xl">username</h1> -->
+            </div>
+        </div>
+        <div class="bottom h-full">
+
+            <div class="conversationArea h-full pt-[5rem]">
+
+                <!-- Hard code for messaging -->
+              <!-- <div class="incomingMessage bg-slate-200 w-fit rounded-sm p-2">
+                <p>Hello demo </p>
+              </div>
+             <div class="outgoingMessage ml-auto bg-slate-200 w-fit rounded-sm p-2">
+                <p>Hello demo </p>
+             </div> -->
+              
+            </div>
+
+
+            <div class="messageInputField absolute bottom-0 p-3 w-full flex items-center justify-center gap-3">
+                <input class="w-[75%] p-3 rounded" type="text" placeholder="Type message here...">
+                <button id="sendMessage" class="bg-blue-500 text-2xl rounded  p-2 w-[5%]"><i class="ri-send-plane-line"></i></button>
+            </div>
+        </div>
+    </div>
+
+
+
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    var socket = io();
+    const loggedInUsername = "<%= user.username%>"
+    let receiver = null
+    socket.emit("join",loggedInUsername);
+</script>
+
+<script>
+    function openChat(userImage, username){
+        receiver = username
+        document.querySelector('.right .top .userChatBox img').src = userImage
+        document.querySelector('.right .top .userChatBox h1').innerText = username
+
+        socket.emit('openChat',{
+            receiver,
+            sender:loggedInUsername,
+        })
+    }
+//---------Saving chats btw sender & receiver
+    socket.on('openChat', messages =>{
+        messages.forEach(MessageObject => {
+            if(MessageObject.sender === loggedInUsername ){
+                appendOutgoingMessage(MessageObject.text);
+            }else{
+                appendIncomingMessage(MessageObject.text);
+            }
+        });
+
+        // console.log(messages)
+    })
+
+// ------------OutgoingMessage------------------------------------------------
+    function appendOutgoingMessage(message){
+    const template = `<div class="message ml-auto bg-slate-400 w-fit p-2 rounded-sm">
+        <p>${message}</p>
+     </div>`
+     document.querySelector('.conversationArea').innerHTML += template
+
+
+//------will change the position of below code (check code in last of this file)  
+    //  socket.emit('sony',{
+    //     sender: loggedInUsername,
+    //     receiver: receiver,
+    //     message: message,
+    //  })
+}
+
+// ------------IncomingMessage------------------------------------------------
+    function appendIncomingMessage(message){
+        const template = ` <div class="message bg-slate-400 w-fit p-2 rounded-sm">
+          <p>${message}</p>
+        </div>`
+    document.querySelector('.conversationArea').innerHTML += template
+}
+socket.on('max', MessageObject =>{
+    appendIncomingMessage(MessageObject.message);
+    // console.log(MessageObject);
+})
+
+document.querySelector('#sendMessage').addEventListener('click',()=>{
+    const message = document.querySelector('.messageInputField input').value
+    appendOutgoingMessage(message)
+
+    socket.emit('sony',{
+        sender: loggedInUsername,
+        receiver: receiver,
+        message: message,
+     })
+})
+
+
+</script>
+
+
+
+<%- include("partials/footer") %>

@@ -1,0 +1,27 @@
+<%- include("partials/header") %> <%- include("partials/nav") %>
+
+<div
+  class="w-[80%] mx-auto p-10 bg-gradient-to-r from-sky-200 to-indigo-200 mt-5 rounded"
+>
+  <form action="/post/create-post" method="post" enctype="multipart/form-data">
+    <h1 class="text-5xl font-bold mb-10">Create Post</h1>
+    <input
+      class="w-1/2 mb-5 p-3 border rounded"
+      type="text"
+      placeholder="Title"
+      name="title"
+    />
+    <input
+      class="w-1/2 mb-2 p-3 border rounded"
+      type="file"
+      name="media"
+    />
+    <button
+      class="mb-5 bg-sky-500 hover:bg-emerald-600 w-1/2 text-3xl hover:text-white p-3 rounded"
+    >
+      Create Post
+    </button>
+  </form>
+</div>
+
+<%- include("partials/footer") %>

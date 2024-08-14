@@ -1,0 +1,30 @@
+<nav
+  class="bg-slate-700 text-white flex justify-between text-xl font-semibold gap-x-12 py-5 px-5"
+>
+  <div class="text-3xl font-extrabold">LOGO</div>
+  <div class="flex gap-x-12">
+    <% if(user){ %>
+    <a class="hover:text-zinc-300" href="/user/profile">Home</a>
+    <a class="hover:text-zinc-300" href="/post/create-post">Create Post</a>
+    <a class="hover:text-zinc-300" href="/user/chat">Chat</a>
+    <% }else{ %>
+    <a class="hover:text-zinc-300" href="/">Home</a>
+    <% } %>
+    <a class="hover:text-zinc-300" href="/about">About</a>
+    <a class="hover:text-zinc-300" href="/contact">Contact</a>
+  </div>
+
+  <div class="div">
+    <% if(user){ %>
+    <a href="/user/settings"><img class="rounded-full w-[30px] h-[30px]" src="<%= user.avatar.thumbnailUrl%>" alt=""></a>
+    <!-- <a href="/user/settings"><img class="rounded-full w-[30px] h-[30px]" src="<%= user.avatar%>" alt=""><%= user.username%></a> -->
+  
+    <% }else{ %>
+    <a
+      class="bg-green-500 hover:bg-emerald-600 px-5 py-2 rounded hover:text-dark"
+      href="/login"
+      >Login</a
+    >
+    <% } %>
+  </div>
+</nav>

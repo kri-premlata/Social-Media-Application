@@ -1,0 +1,189 @@
+<%- include("partials/header") %> <%- include("partials/nav") %>
+
+<div
+  class="w-[80%] flex mx-auto p-3 bg-gradient-to-r from-sky-200 to-indigo-200 mt-3 rounded"
+>
+  <div class="w-[70%]">
+    <div class="flex w-full p-5">
+      <div>
+        <img
+          class="avatarimage rounded-full w-[12vmax] h-[12vmax] object-cover"
+          src="<%= user.avatar.url%>"
+          alt="No image Found"
+        />
+
+        <form
+          method="post"
+          class="avatarform hidden"
+          action="/user/avatar/<%= user._id%>"
+          enctype="multipart/form-data"
+        >
+          <input class="avatarinput" type="file" name="avatar" />
+        </form>
+      </div>
+
+      <div class="ml-6">
+        <h1 class="text-5xl font-bold">
+          <%= user.username %>
+          <% if(user.isPremium){ %>
+            <small>Premium Account</small>
+         <% }%>
+        </h1>
+    
+        <p class="text-2xl mt-2 font-semibold"><%= user.email %></p>
+      </div>
+    </div>
+
+    <form class="px-10" action="/user/update/<%= user._id%>" method="post">
+      <h1 class="text-3xl font-bold mb-7">User Profile Details</h1>
+      <input
+        class="w-[90%] mb-5 p-3 border rounded"
+        type="email"
+        placeholder="username@example.com"
+        name="email"
+        value="<%= user.email%>"
+      />
+      <input
+        class="w-[90%] mb-5 p-3 border rounded"
+        type="text"
+        placeholder="username"
+        name="username"
+        value="<%= user.username%>"
+      />
+      <button
+        class="mb-5 mt-3 bg-sky-500 hover:bg-emerald-600 w-[90%] text-3xl hover:text-white p-3 rounded"
+      >
+        Update User Profile
+      </button>
+    </form>
+  </div>
+
+  <div class="w-[30%] p-4">
+    <h1 class="text-3xl font-bold">Setting Options</h1>
+
+    <ul class="pt-5 flex flex-col font-semibold gap-y-2 text-xl">
+      <button id="rzp-button1">Pay with Razorpay</button>
+      <li class="hover:text-emerald-600">
+        <a href="/user/reset-password/<%= user._id%>">Reset Password</a>
+      </li>
+      <li class="hover:text-emerald-600">
+        <a href="/user/logout">Logout User</a>
+      </li>
+      <li class="hover:text-emerald-600">
+        <a href="/user/delete/<%= user._id%>">Delete User</a>
+      </li>
+    </ul>
+  </div>
+</div>
+<br />
+
+<div class="w-[80%] mx-auto pb-10">
+  <hr />
+  <h1 class="text-2xl font-bold mt-5">User TimeLine</h1>
+  <div><%= JSON.stringify(user.posts)%></div>
+</div>
+
+<!-----------JQuery CDN------------>
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+  integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+  crossorigin="anonymous"
+  referrerpolicy="no-referrer"
+></script>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+  var orderId;
+  $(document).ready(function () {
+    var settings = {
+      "url": "/user/create-order",
+      "method": "POST",
+      "timeout": 0,
+     " headers": {
+        "Content-Type": "application/json",
+      },
+     " data": JSON.stringify({
+       " username": "<%= user.username %>",
+      }),
+    };
+
+    //creates new orderId everytime
+    $.ajax(settings).done(function (response) {
+      var options = {
+        "key": "rzp_test_LiojQFmx3bYLOx", // Enter the Key ID generated from the Dashboard
+        "amount": response.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+        "currency": response.currency,
+        "name": "Acme Corp",
+        "description": "Test Transaction",
+        "image": "https://example.com/your_logo",
+        "order_id": response.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+        "handler": function (response) {
+          // alert(response.razorpay_payment_id);
+          // alert(response.razorpay_order_id);
+          // alert(response.razorpay_signature);
+
+          const payment ={
+            payment_id: response.razorpay_payment_id,
+            order_id: response.razorpay_order_id,
+            signature: response.razorpay_signature,
+          }
+
+    var settings = {      
+      "url": "/user/payment/verify",
+      "method": "POST",
+      "timeout": 0,
+     " headers": {
+        "Content-Type": "application/json",
+      },
+     " data": JSON.stringify(payment)   
+    };
+    $.ajax(settings).done(function(response){
+      console.log(response);
+    });      
+        },
+
+        "prefill": {
+          "name": "Gaurav Kumar",
+          "email": "gaurav.kumar@example.com",
+          "contact": "9000090000",
+        },
+       " notes": {
+          "address": "Razorpay Corporate Office",
+        },
+        "theme": {
+         " color": "#3399cc",
+        },
+      };
+      var rzp1 = new Razorpay(options);
+      rzp1.on("payment.failed", function (response) {
+        alert(response.error.code);
+        alert(response.error.description);
+        alert(response.error.source);
+        alert(response.error.step);
+        alert(response.error.reason);
+        alert(response.error.metadata.order_id);
+        alert(response.error.metadata.payment_id);
+      });
+      document.getElementById("rzp-button1").onclick = function (e) {
+        rzp1.open();
+        e.preventDefault();
+      };
+    });
+  });
+</script>
+
+<script>
+  const avatarImage = document.querySelector(".avatarimage");
+  const avatarInput = document.querySelector(".avatarinput");
+  const avatarForm = document.querySelector(".avatarform");
+
+  avatarImage.addEventListener("click", () => {
+    avatarInput.click();
+  });
+  avatarInput.addEventListener("change", () => {
+    avatarForm.submit();
+  });
+</script>
+
+<%- include("partials/footer") %>

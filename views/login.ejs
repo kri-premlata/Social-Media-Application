@@ -1,0 +1,39 @@
+<%- include("partials/header") %> <%- include("partials/nav") %>
+
+<div
+  class="w-[80%] mx-auto p-10 bg-gradient-to-r from-sky-200 to-indigo-200 mt-5 rounded"
+>
+  <form action="/user/login" method="post">
+    <h1 class="text-5xl font-bold mb-10">Login User</h1>
+    <input
+      class="w-1/2 mb-5 p-3 border rounded"
+      type="text"
+      placeholder="username"
+      name="username"
+    />
+    <input
+      class="w-1/2 mb-2 p-3 border rounded"
+      type="password"
+      placeholder="*******"
+      name="password"
+    />
+    <p class="mb-5 text-right-[100%] text-xl">
+      <a class="text-blue-400 hover:text-emerald-600" href="/forget-password"
+        >Forget password ?</a
+      >
+    </p>
+    <button
+      class="mb-5 bg-sky-500 hover:bg-emerald-600 w-1/2 text-3xl hover:text-white p-3 rounded"
+    >
+      Login User
+    </button>
+    <p class="text-2xl">
+      Don't have an account ?
+      <a class="text-blue-400 hover:text-emerald-600" href="/register"
+        >Register</a
+      >
+    </p>
+  </form>
+</div>
+
+<%- include("partials/footer") %>
